@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "db:push": "npx prisma db push",
+    "db:migrate": "npx prisma migrate dev",
     "db:generate": "npx prisma generate",
     "studio": "npx prisma studio",
     "vercel-build": "prisma generate && prisma migrate deploy && next build",
