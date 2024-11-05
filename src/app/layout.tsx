@@ -1,4 +1,6 @@
 import Fathom from "@/components/fathom";
+import { Navigation } from "@/components/navigation";
+import { ReactQueryProvider } from "@/components/react-query-provider";
 import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
@@ -29,9 +31,18 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        style={{
+          backgroundColor: "#151515",
+          backgroundImage:
+            "radial-gradient(#2c2c2c 1.4500000000000002px, #151515 1.4500000000000002px)",
+          backgroundSize: "29px 29px",
+        }}
       >
         <Fathom />
-        {children}
+        <ReactQueryProvider>
+          <Navigation />
+          {children}
+        </ReactQueryProvider>
         <Toaster />
       </body>
     </html>
