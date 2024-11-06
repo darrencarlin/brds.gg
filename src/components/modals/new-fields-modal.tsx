@@ -1,5 +1,6 @@
 "use client";
 
+import { addGame } from "@/actions/game";
 import {
   Dialog,
   DialogContent,
@@ -15,9 +16,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import {
+  setLoading,
+  setSelectedGame,
+  setSelectedRawgGame,
+} from "@/store/slices/app";
 import { Field, Fields } from "@/types";
 import { Delete, Zap } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -29,12 +38,14 @@ interface Props {
 }
 
 export const NewFieldsModal = ({ open, onOpenChange }: Props) => {
+  const router = useRouter();
+  const dispatch = useAppDispatch();
   const [fields, setFields] = useState<Fields>([]);
   const [name, setName] = useState("");
   const [type, setType] = useState<Field["type"]>("number");
   const [defaultValue, setDefaultValue] = useState("0");
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
-
+  const { selectedRawgGame } = useAppSelector((state) => state.app);
   const getDefaultValue = (value: string | number | boolean | undefined) => {
     if (String(value) === "true") return "True";
     if (String(value) === "false") return "False";
@@ -42,7 +53,18 @@ export const NewFieldsModal = ({ open, onOpenChange }: Props) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={() => {
+        if (open) {
+          // Reset
+          dispatch(setSelectedRawgGame(null));
+          dispatch(setSelectedGame(null));
+          dispatch(setLoading(false));
+        }
+        onOpenChange(!open);
+      }}
+    >
       <DialogContent className="w-full min-w-[80vw] min-h-[80vh] max-w-3xl p-6 overflow-hidden rounded-lg  text-white border-neutral-700">
         <DialogHeader>
           <DialogTitle className="flex gap-2 items-center text-3xl font-semibold">
@@ -156,7 +178,7 @@ export const NewFieldsModal = ({ open, onOpenChange }: Props) => {
             onClick={() => {
               const field = {
                 id: name.toLowerCase().replace(" ", "-"),
-                name,
+                name: name.trim(),
                 type,
                 defaultValue:
                   type === "boolean" ? defaultValue === "true" : defaultValue,
@@ -247,8 +269,38 @@ export const NewFieldsModal = ({ open, onOpenChange }: Props) => {
         {/* Save Fields Button */}
         <Button
           type="button"
-          onClick={() => {
-            console.log(fields);
+          onClick={async () => {
+            if (!selectedRawgGame) {
+              return;
+            }
+
+            const { success, message, data } = await addGame({
+              name: selectedRawgGame?.name,
+              image: selectedRawgGame?.background_image,
+              fields,
+            });
+
+            toast(message);
+
+            if (!success) {
+              dispatch(setLoading(false));
+              return;
+            }
+
+            if (success && data) {
+              // Serialize the data to avoid non-serializable value was detected in the state
+              const payload = JSON.parse(JSON.stringify(data));
+              dispatch(setSelectedGame(payload));
+              dispatch(setSelectedRawgGame(null));
+              dispatch(setLoading(false));
+              onOpenChange(false);
+
+              const session = {
+                id: "9233bdcc-edf1-4bc6-a75d-3b8a3aa9386f",
+              };
+
+              router.push(`/session/${session.id}`);
+            }
           }}
           className="w-full sm:w-auto px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2"
         >

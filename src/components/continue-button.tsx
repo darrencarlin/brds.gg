@@ -33,50 +33,9 @@ export const ContinueButton = () => {
       setModal(true);
 
       return;
-
-      // const fields = [
-      //   {
-      //     id: "kills",
-      //     name: "Kills",
-      //     type: "number",
-      //     defaultValue: 0,
-      //     icon: "crosshair",
-      //   },
-      //   {
-      //     id: "deaths",
-      //     name: "Deaths",
-      //     type: "number",
-      //     defaultValue: 0,
-      //     icon: "skull",
-      //   },
-      // ];
-
-      // const { success, message, data } = await addGame({
-      //   name: selectedRawgGame.name,
-      //   image: selectedRawgGame.background_image,
-      //   fields,
-      // });
-
-      // toast(message);
-
-      // if (!success) {
-      //   dispatch(setLoading(false));
-      //   return;
-      // }
-
-      // if (success && data) {
-      //   // Serialize the data to avoid non-serializable value was detected in the state
-      //   const payload = JSON.parse(JSON.stringify(data));
-      //   dispatch(setSelectedGame(payload));
-      //   dispatch(setSelectedRawgGame(null));
-      //   dispatch(setLoading(false));
-      // }
     }
 
-    // Create a session with the selected game
-    // Redirect to the session page
-
-    dispatch(setLoading(false));
+    console.log("Continue with existing game");
 
     const session = {
       id: "9233bdcc-edf1-4bc6-a75d-3b8a3aa9386f",
