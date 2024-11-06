@@ -7,14 +7,14 @@ export const Navigation = () => {
         BRDS.gg
       </Link>
 
-      <div className="flex gap-4">
+{/*       <div className="flex gap-4">
         <Link
           href="/new-session"
           className="font-bold bg-zinc-950 hover:bg-zinc-900 text-white p-2 rounded"
         >
           New Session
         </Link>
-      </div>
+      </div> */}
     </nav>
   );
 };
