@@ -16,7 +16,7 @@ export const SignOutButton = async () => {
         await signOut();
       }}
     >
-      <Button type="submit" className="p-2">
+      <Button type="submit" className="p-2 rounded">
         <LogOut />
       </Button>
     </form>

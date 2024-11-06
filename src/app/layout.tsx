@@ -1,5 +1,6 @@
 import Fathom from "@/components/fathom";
 import LandingPage from "@/components/landing-page";
+
 import { Navigation } from "@/components/navigation";
 import { ReactQueryProvider } from "@/components/react-query-provider";
 import { Toaster } from "@/components/ui/sonner";
