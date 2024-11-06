@@ -6,7 +6,7 @@ export const Navigation = () => {
       <Link href="/" className="font-bold text-white">
         BRDS.gg
       </Link>
-
+      <div/>
 {/*       <div className="flex gap-4">
         <Link
           href="/new-session"
