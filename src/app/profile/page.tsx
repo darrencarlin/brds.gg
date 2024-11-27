@@ -1,4 +1,5 @@
 import { Library } from "@/components/library";
+import { Sessions } from "@/components/sessions";
 import { UserProfileCard } from "@/components/user-card";
 import { auth } from "@/lib/auth";
 
@@ -12,9 +13,10 @@ export default async function Profile() {
   }
 
   return (
-    <div className="min-h-screen w-full text-white p-4">
+    <div className="min-h-[calc(100vh-68px)] w-full text-white p-4">
       <UserProfileCard user={session.user} />
       <Library hasDeleteButton={true} />
+      <Sessions />
     </div>
   );
 }

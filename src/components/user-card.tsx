@@ -30,19 +30,6 @@ export const UserProfileCard = ({ user }: Props) => {
             </div>
           </div>
         </div>
-        <div>
-          <div className="space-y-2">
-            <p>
-              <span className="font-medium">ID:</span> {user.id}
-            </p>
-            <p>
-              <span className="font-medium">Created At:</span>{" "}
-              {user.createdAt
-                ? new Date(user.createdAt).toLocaleString()
-                : "N/A"}
-            </p>
-          </div>
-        </div>
       </div>
     </div>
   );

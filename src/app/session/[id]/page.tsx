@@ -1,10 +1,10 @@
-import { SessionClient } from "./client";
+import HomePageClient from "./client";
 
-export default async function Page({
+export default async function HomePage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const id = (await params).id;
-  return <SessionClient id={id} />;
+  const { id } = await params;
+  return <HomePageClient id={id} />;
 }

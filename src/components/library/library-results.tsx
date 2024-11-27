@@ -4,28 +4,35 @@ import { cn } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setSelectedGame, setSelectedRawgGame } from "@/store/slices/app";
 import { shimmer, toBase64 } from "@/utils/functions";
-import { Game } from "@prisma/client";
+
+import { Game } from "@/types";
+import { useQuery } from "convex/react";
+
 import Image from "next/image";
+import { api } from "../../../convex/_generated/api";
 import { GridWrapper } from "../grid-wrapper";
 import { RemoveGameButton } from "../remove-game-button";
 
 interface Props {
-  results: Game[] | undefined;
   hasDeleteButton: boolean;
 }
 
-export const LibraryResults = ({ results, hasDeleteButton }: Props) => {
+export const LibraryResults = ({ hasDeleteButton }: Props) => {
   const dispatch = useAppDispatch();
+
+  const { user: session } = useAppSelector((state) => state.auth);
+
+  const games = useQuery(api.game.getGames, { email: session?.email ?? "" });
 
   const { selectedGame } = useAppSelector((state) => state.app);
 
-  if (results?.length === 0) {
+  if (games?.length === 0) {
     return <p className="text-2xl font-semibold">No games found</p>;
   }
 
   return (
     <GridWrapper>
-      {results?.map((game: Game) => {
+      {games?.map((game: Game) => {
         if (!game.image) {
           return null;
         }
@@ -43,7 +50,6 @@ export const LibraryResults = ({ results, hasDeleteButton }: Props) => {
               onClick={async () => {
                 dispatch(setSelectedGame(game));
                 dispatch(setSelectedRawgGame(null));
-                console.log("Game selected", game);
               }}
               className="flex flex-col w-full"
             >

@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { NewSessionButton } from "./new-session-button";
 import { ProfileButton } from "./profile-button";
+import { SessionButton } from "./session-button";
 import { SignInButton } from "./sign-in-button";
 import { SignOutButton } from "./sign-out-button";
 
@@ -14,7 +14,7 @@ export const Navigation = async () => {
       <div className="flex items-center gap-4">
         <ProfileButton />
         <SignInButton />
-        <NewSessionButton />
+        <SessionButton />
         <SignOutButton />
       </div>
     </nav>

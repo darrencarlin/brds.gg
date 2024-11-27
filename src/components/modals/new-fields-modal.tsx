@@ -1,6 +1,5 @@
 "use client";
 
-import { addGame } from "@/actions/game";
 import {
   Dialog,
   DialogContent,
@@ -9,28 +8,36 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   setLoading,
   setSelectedGame,
   setSelectedRawgGame,
 } from "@/store/slices/app";
-import { Field, Fields } from "@/types";
-import { Delete, Zap } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Field, Fields, Game } from "@/types";
+import {
+  Crosshair,
+  DiamondPlus,
+  Gamepad2,
+  LogOut,
+  Pickaxe,
+  Skull,
+  Trash2,
+  WandSparkles,
+  Zap,
+} from "lucide-react";
 import { useState } from "react";
+
+import { addField, removeField, updateIndicator } from "@/store/slices/game";
+import { useMutation } from "convex/react";
 import { toast } from "sonner";
+import { v4 as uuidv4 } from "uuid";
+import { api } from "../../../convex/_generated/api";
+import { IconPicker } from "../icon-picker";
 import { Button } from "../ui/button";
+import { Checkbox } from "../ui/checkbox";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 
 interface Props {
   open: boolean;
@@ -38,20 +45,17 @@ interface Props {
 }
 
 export const NewFieldsModal = ({ open, onOpenChange }: Props) => {
-  const router = useRouter();
+  // const router = useRouter();
+  const { user: session } = useAppSelector((state) => state.auth);
+  const createGame = useMutation(api.game.createGame);
   const dispatch = useAppDispatch();
-  const [fields, setFields] = useState<Fields>([]);
-  const [name, setName] = useState("");
-  const [type, setType] = useState<Field["type"]>("number");
-  const [defaultValue, setDefaultValue] = useState("0");
-  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
-  const { selectedRawgGame } = useAppSelector((state) => state.app);
-  const getDefaultValue = (value: string | number | boolean | undefined) => {
-    if (String(value) === "true") return "True";
-    if (String(value) === "false") return "False";
-    return value;
-  };
 
+  const [name, setName] = useState("");
+  const [icon, setIcon] = useState("Zap");
+  const [defaultValue, setDefaultValue] = useState("0");
+
+  const { selectedRawgGame } = useAppSelector((state) => state.app);
+  const { fields, indicator } = useAppSelector((state) => state.game);
   return (
     <Dialog
       open={open}
@@ -65,13 +69,18 @@ export const NewFieldsModal = ({ open, onOpenChange }: Props) => {
         onOpenChange(!open);
       }}
     >
-      <DialogContent className="w-full min-w-[80vw] min-h-[80vh] max-w-3xl p-6 overflow-hidden rounded-lg  text-white border-neutral-700">
+      <DialogContent className="w-full max-w-3xl p-6 overflow-hidden rounded-lg bg-neutral-900  text-white border-neutral-700">
         <DialogHeader>
           <DialogTitle className="flex gap-2 items-center text-3xl font-semibold">
             <Zap /> Add Metrics for Tracking
           </DialogTitle>
           <DialogDescription className="text-white text-xl">
-            Add the metrics you want to track for the leaderboard.
+            <span className="block mb-2">
+              Add the metrics you want to track for the leaderboard.
+            </span>
+            <span className="text-neutral-400 text-base font-bold">
+              You cannot change the metrics once you save the game.
+            </span>
           </DialogDescription>
         </DialogHeader>
 
@@ -84,7 +93,7 @@ export const NewFieldsModal = ({ open, onOpenChange }: Props) => {
             <Input
               id="name"
               type="text"
-              placeholder="Enter Metric Name"
+              placeholder="Metric Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -93,220 +102,205 @@ export const NewFieldsModal = ({ open, onOpenChange }: Props) => {
             />
           </div>
 
-          {/* Type Selection */}
+          {/* Default Value Input */}
+
           <div>
-            <Label className="block text-sm font-medium mb-2">Type</Label>
-            <RadioGroup
-              value={type}
-              className="mt-2 flex gap-6"
-              onValueChange={(value) => {
-                setType(value as Field["type"]);
-              }}
+            <Label
+              htmlFor="defaultValue"
+              className="block text-sm font-medium mb-2"
             >
-              <div className="flex items-center">
-                <RadioGroupItem value="number" id="r1" />
-                <Label htmlFor="r1" className="ml-2">
-                  Number
-                </Label>
-              </div>
-              <div className="flex items-center">
-                <RadioGroupItem value="boolean" id="r2" />
-                <Label htmlFor="r2" className="ml-2">
-                  Boolean
-                </Label>
-              </div>
-            </RadioGroup>
+              Default Value
+            </Label>
+            <Input
+              id="defaultValue"
+              type="number"
+              inputMode="numeric"
+              placeholder="0"
+              value={defaultValue}
+              onChange={(e) => setDefaultValue(e.target.value)}
+              required
+              aria-label="Default Value"
+              className="w-full bg-white/10 border-white/20 text-white placeholder-white/50 rounded-md focus:outline-none focus:ring-2"
+            />
           </div>
 
-          {/* Default Value Input */}
-          {type === "number" && (
-            <div>
-              <Label
-                htmlFor="defaultValue"
-                className="block text-sm font-medium mb-2"
-              >
-                Default Value
-              </Label>
-              <Input
-                id="defaultValue"
-                type="number"
-                placeholder="0"
-                value={defaultValue}
-                onChange={(e) => setDefaultValue(e.target.value)}
-                required
-                aria-label="Default Value"
-                className="w-full bg-white/10 border-white/20 text-white placeholder-white/50 rounded-md focus:outline-none focus:ring-2"
-              />
-            </div>
-          )}
-
-          {type === "boolean" && (
-            <div>
-              <Label className="block text-sm font-medium mb-2">
-                Default Value
-              </Label>
-              <Select>
-                <SelectTrigger className="w-full">
-                  <SelectValue
-                    placeholder="Select True/False"
-                    className="w-full bg-white/10 border-white/20 text-white placeholder-white/50 rounded-md focus:outline-none focus:ring-2"
-                  />
-                </SelectTrigger>
-                <SelectContent className="w-full bg-white/10 border-white/20 text-white placeholder-white/50 rounded-md focus:outline-none focus:ring-2">
-                  <SelectItem
-                    value="true"
-                    className="w-full bg-white/10 border-white/20 text-white placeholder-white/50 rounded-md focus:outline-none focus:ring-2"
-                  >
-                    True
-                  </SelectItem>
-                  <SelectItem
-                    value="false"
-                    className="w-full bg-white/10 border-white/20 text-white placeholder-white/50 rounded-md focus:outline-none focus:ring-2"
-                  >
-                    False
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          <div>
+            <IconPicker icon={icon} setIcon={setIcon} />
+          </div>
         </form>
 
         {/* Footer Section with Add Button */}
-        <DialogFooter className="mt-8">
+        <DialogFooter>
           <Button
             type="button"
+            variant="secondary"
             onClick={() => {
-              const field = {
-                id: name.toLowerCase().replace(" ", "-"),
-                name: name.trim(),
-                type,
-                defaultValue:
-                  type === "boolean" ? defaultValue === "true" : defaultValue,
+              const field: Field = {
+                id: uuidv4(),
+                title: name.trim(),
+                name: name.toLowerCase().replace(" ", "-"),
+                defaultValue: defaultValue.trim(),
+                icon,
               };
 
-              setFields([...fields, field]);
-              setName("");
-              setType("number");
-              setDefaultValue("0");
+              // Default the first field as the key metric indicator
+              if (fields?.length === 0) {
+                dispatch(updateIndicator(field.name));
+              }
 
-              console.log(field);
+              dispatch(addField(field));
+
+              setName("");
+              setDefaultValue("0");
             }}
-            className="w-full sm:w-auto px-4 py-2  rounded-md  focus:outline-none focus:ring-2 focus:ring-offset-2"
           >
             Add Field
           </Button>
         </DialogFooter>
 
         {/* Fields Table */}
-        {fields.length > 0 && (
-          <div className="mt-8 overflow-x-auto">
-            <table className="min-w-full table-auto border-collapse">
-              <thead>
-                <tr className="bg-gray-900">
-                  {fields.map((field) => (
-                    <th
-                      key={field.id}
-                      className="px-4 py-2 text-left text-xs font-medium text-gray-300 uppercase tracking-wider border-b "
-                    >
-                      <div className="flex items-center justify-between">
-                        <span>{field.name}</span>
-                        <button
-                          onClick={() => {
-                            const newFields = fields.filter(
-                              (f) => f.id !== field.id
-                            );
-                            setFields(newFields);
-                          }}
-                          aria-label="Delete Field"
-                        >
-                          <Delete className="stroke-red-500 hover:stroke-red-700 transition-all duration-150" />
-                        </button>
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {fields.map((field, index) => (
-                  <tr
-                    key={field.id}
-                    onMouseEnter={() => setHoveredRow(index)}
-                    onMouseLeave={() => setHoveredRow(null)}
-                    className={`transition-all duration-300 ease-in-out ${
-                      hoveredRow === index ? "" : ""
-                    }`}
-                  >
-                    {fields.map((field, idx) => (
-                      <td
-                        key={field.id}
-                        className={`px-4 py-3 text-sm border-b ${
-                          idx === 0 ? "rounded-l-lg" : ""
-                        } ${idx === fields.length - 1 ? "rounded-r-lg" : ""}`}
-                      >
-                        <div className="flex items-center">
-                          <span
-                            className={`inline-block w-2 h-2 mr-2 rounded-full ${
-                              hoveredRow === index ? "" : ""
-                            }`}
-                          ></span>
-                          <span
-                            className={`font-medium transition-all duration-300 ease-in-out ${
-                              hoveredRow === index ? "" : ""
-                            }`}
-                          >
-                            {getDefaultValue(field.defaultValue)}
-                          </span>
-                        </div>
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <SimpleFieldList />
 
         {/* Save Fields Button */}
-        <Button
-          type="button"
-          onClick={async () => {
-            if (!selectedRawgGame) {
-              return;
-            }
-
-            const { success, message, data } = await addGame({
-              name: selectedRawgGame?.name,
-              image: selectedRawgGame?.background_image,
-              fields,
-            });
-
-            toast(message);
-
-            if (!success) {
-              dispatch(setLoading(false));
-              return;
-            }
-
-            if (success && data) {
-              // Serialize the data to avoid non-serializable value was detected in the state
-              const payload = JSON.parse(JSON.stringify(data));
-              dispatch(setSelectedGame(payload));
-              dispatch(setSelectedRawgGame(null));
-              dispatch(setLoading(false));
-              onOpenChange(false);
-
-              const session = {
-                id: "9233bdcc-edf1-4bc6-a75d-3b8a3aa9386f",
+        {fields && fields.length > 0 && (
+          <Button
+            type="button"
+            variant="secondary"
+            className="w-fit ml-auto"
+            onClick={async () => {
+              const game: Game = {
+                id: uuidv4(),
+                name: selectedRawgGame?.name as string,
+                indicator: indicator as string,
+                image: selectedRawgGame?.background_image as string,
+                user: session?.email as string,
+                fields: fields as Fields,
               };
 
-              router.push(`/session/${session.id}`);
-            }
-          }}
-          className="w-full sm:w-auto px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2"
-        >
-          Save Fields
-        </Button>
+              await createGame({ game });
+
+              dispatch(setSelectedRawgGame(null));
+              dispatch(setSelectedGame(null));
+              onOpenChange(!open);
+              dispatch(setLoading(false));
+              toast("Game saved successfully!");
+
+              // if (!selectedRawgGame) {
+              //   return;
+              // }
+
+              // const { success, message, data } = await addGame({
+              //   name: selectedRawgGame?.name,
+              //   image: selectedRawgGame?.background_image,
+              //   fields,
+              // });
+
+              // toast(message);
+
+              // if (!success) {
+              //   dispatch(setLoading(false));
+              //   return;
+              // }
+
+              // if (success && data) {
+              //   // Serialize the data to avoid non-serializable value was detected in the state
+              //   const payload = JSON.parse(JSON.stringify(data));
+              //   dispatch(setSelectedGame(payload));
+              //   dispatch(setSelectedRawgGame(null));
+              //   dispatch(setLoading(false));
+              //   onOpenChange(false);
+
+              //   const session = {
+              //     id: "9233bdcc-edf1-4bc6-a75d-3b8a3aa9386f",
+              //   };
+
+              //   router.push(`/session/${session.id}`);
+              // }
+            }}
+          >
+            Save Game{" "}
+          </Button>
+        )}
       </DialogContent>
     </Dialog>
   );
 };
+
+const SimpleFieldList = () => {
+  const dispatch = useAppDispatch();
+  const { fields, indicator } = useAppSelector((state) => state.game);
+
+  const renderIcon = (icon: string) => {
+    switch (icon) {
+      case "Zap":
+        return <Zap />;
+      case "Skull":
+        return <Skull />;
+      case "Crosshair":
+        return <Crosshair />;
+      case "DiamondPlus":
+        return <DiamondPlus />;
+      case "Gamepad2":
+        return <Gamepad2 />;
+      case "WandSparkles":
+        return <WandSparkles />;
+      case "Pickaxe":
+        return <Pickaxe />;
+      case "LogOut":
+        return <LogOut />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div>
+      <ul className="space-y-4 bg-neutral-800">
+        {fields &&
+          fields.map((field) => (
+            <li
+              key={field.id}
+              className="flex items-center justify-between border-b border-white p-2 px-4"
+            >
+              <div className="flex items-center gap-4">
+                <div>{field.title}</div>
+                <div>{renderIcon(field.icon)}</div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    className="bg-white"
+                    id="indicator"
+                    defaultChecked={indicator === field.name}
+                    checked={indicator === field.name}
+                    onClick={() => {
+                      dispatch(updateIndicator(field.name));
+                    }}
+                  />
+                  <label
+                    htmlFor="indicator"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Key Metric Indicator
+                  </label>
+                </div>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => {
+                    dispatch(removeField(field.id));
+                  }}
+                  aria-label="Delete Field"
+                  className="text-white cursor-pointer"
+                >
+                  <Trash2 />
+                </Button>
+              </div>
+            </li>
+          ))}
+      </ul>
+    </div>
+  );
+};
+
+export default SimpleFieldList;

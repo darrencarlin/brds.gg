@@ -1,5 +1,6 @@
 import { BASE_URL } from "@/constants";
-import { Game } from "@prisma/client";
+import { Game } from "@/types";
+
 import { headers } from "next/headers";
 
 export const getGames = async (): Promise<Game[]> => {

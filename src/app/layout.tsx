@@ -1,12 +1,13 @@
 import Fathom from "@/components/fathom";
-import LandingPage from "@/components/landing-page";
 
+import { Auth } from "@/components/auth";
+import { ConvexClientProvider } from "@/components/convex-provider";
 import { Navigation } from "@/components/navigation";
 import { ReactQueryProvider } from "@/components/react-query-provider";
 import { Toaster } from "@/components/ui/sonner";
 import StoreProvider from "@/store/provider";
-import { AppState } from "@/store/slices/app";
 import type { Metadata } from "next";
+import { SessionProvider } from "next-auth/react";
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -28,21 +29,11 @@ export const metadata: Metadata = {
 
 const WAIT_LIST = process.env.WAIT_LIST;
 
-const getAppState = async (): Promise<AppState> => {
-  return {
-    isLoading: false,
-    selectedRawgGame: null,
-    selectedGame: null,
-  };
-};
-
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const appState = await getAppState();
-
   if (WAIT_LIST === "true") {
     return (
       <html lang="en">
@@ -56,7 +47,6 @@ export default async function RootLayout({
           }}
         >
           <Fathom />
-          <LandingPage />
           <Toaster />
         </body>
       </html>
@@ -65,7 +55,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <StoreProvider appState={appState}>
+      <StoreProvider>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
           style={{
@@ -76,11 +66,17 @@ export default async function RootLayout({
           }}
         >
           <Fathom />
-          <ReactQueryProvider>
-            <Navigation />
-            {children}
-          </ReactQueryProvider>
-          <Toaster />
+          <SessionProvider>
+            <ConvexClientProvider>
+              <ReactQueryProvider>
+                <Auth />
+                <Navigation />
+                {children}
+              </ReactQueryProvider>
+            </ConvexClientProvider>
+
+            <Toaster />
+          </SessionProvider>
         </body>
       </StoreProvider>
     </html>

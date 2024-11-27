@@ -1,17 +1,18 @@
-import { RawgGame } from "@/types";
-import { Game } from "@prisma/client";
+import { Game, Player, RawgGame } from "@/types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface AppState {
   selectedRawgGame: RawgGame | null;
   selectedGame?: Game | null;
   isLoading: boolean;
+  player: Player | null;
 }
 
 export const initialState: AppState = {
   selectedRawgGame: null,
   selectedGame: null,
   isLoading: false,
+  player: null,
 };
 
 const app = createSlice({

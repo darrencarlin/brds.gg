@@ -13,7 +13,7 @@ export default async function NewSession() {
   }
 
   return (
-    <div className="relative grid grid-rows-[auto_auto_1fr_auto] min-h-screen w-full text-white p-4">
+    <div className="relative grid grid-rows-[auto_auto_1fr_auto] min-h-[calc(100vh-68px)] w-full text-white p-4">
       <Library />
       <Search />
       <ContinueButton />
