@@ -11,6 +11,7 @@ import {
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   setLoading,
+  setSearch,
   setSelectedGame,
   setSelectedRawgGame,
 } from "@/store/slices/app";
@@ -181,41 +182,10 @@ export const NewFieldsModal = ({ open, onOpenChange }: Props) => {
 
               dispatch(setSelectedRawgGame(null));
               dispatch(setSelectedGame(null));
+              dispatch(setSearch(""));
               onOpenChange(!open);
               dispatch(setLoading(false));
-              toast("Game saved successfully!");
-
-              // if (!selectedRawgGame) {
-              //   return;
-              // }
-
-              // const { success, message, data } = await addGame({
-              //   name: selectedRawgGame?.name,
-              //   image: selectedRawgGame?.background_image,
-              //   fields,
-              // });
-
-              // toast(message);
-
-              // if (!success) {
-              //   dispatch(setLoading(false));
-              //   return;
-              // }
-
-              // if (success && data) {
-              //   // Serialize the data to avoid non-serializable value was detected in the state
-              //   const payload = JSON.parse(JSON.stringify(data));
-              //   dispatch(setSelectedGame(payload));
-              //   dispatch(setSelectedRawgGame(null));
-              //   dispatch(setLoading(false));
-              //   onOpenChange(false);
-
-              //   const session = {
-              //     id: "9233bdcc-edf1-4bc6-a75d-3b8a3aa9386f",
-              //   };
-
-              //   router.push(`/session/${session.id}`);
-              // }
+              toast("Game saved successfully!", { position: "bottom-left" });
             }}
           >
             Save Game{" "}

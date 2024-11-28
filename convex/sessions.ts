@@ -183,3 +183,15 @@ export const deleteSessionMutation = mutation({
     await ctx.db.delete(session._id);
   },
 });
+
+export const deleteAllSessionsByUser = mutation({
+  args: { id: v.string() },
+  handler: async (ctx, args) => {
+    const sessions = await ctx.db
+      .query("sessions")
+      .filter((q) => q.eq(q.field("user"), args.id))
+      .collect();
+
+    await Promise.all(sessions.map((session) => ctx.db.delete(session._id)));
+  },
+});

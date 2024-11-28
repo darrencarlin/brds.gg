@@ -7,7 +7,7 @@ import { shimmer, toBase64 } from "@/utils/functions";
 
 import { Game } from "@/types";
 import { useQuery } from "convex/react";
-
+import { motion, Variants } from "motion/react";
 import Image from "next/image";
 import { api } from "../../../convex/_generated/api";
 import { GridWrapper } from "../grid-wrapper";
@@ -30,6 +30,19 @@ export const LibraryResults = ({ hasDeleteButton }: Props) => {
     return <p className="text-2xl font-semibold">No games found</p>;
   }
 
+  // Animation variants
+  const cardVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut",
+      },
+    },
+  };
+
   return (
     <GridWrapper>
       {games?.map((game: Game) => {
@@ -45,34 +58,44 @@ export const LibraryResults = ({ hasDeleteButton }: Props) => {
         );
 
         return (
-          <div key={game.id} className="flex flex-col justify-between w-full">
-            <button
-              onClick={async () => {
-                dispatch(setSelectedGame(game));
-                dispatch(setSelectedRawgGame(null));
-              }}
-              className="flex flex-col w-full"
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={cardVariants}
+            key={game.id}
+          >
+            <motion.div
+              variants={cardVariants}
+              className="flex flex-col justify-between w-full"
             >
-              <div className={imageClassname}>
-                <div className="absolute inset-0 border border-white/10 rounded-md pointer-events-none z-10" />
-                <Image
-                  src={game.image}
-                  alt={game.name}
-                  className="object-cover hover:scale-105 transition-transform duration-300"
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  placeholder={`data:image/svg+xml;base64,${toBase64(
-                    shimmer(700, 475)
-                  )}`}
-                  quality={100}
-                />
-              </div>
-              <div className="flex flex-col flex-grow justify-between w-full">
-                <p className="text-xl font-bold my-2">{game.name}</p>
-              </div>
-            </button>
-            {hasDeleteButton && <RemoveGameButton id={game.id} />}
-          </div>
+              <button
+                onClick={async () => {
+                  dispatch(setSelectedGame(game));
+                  dispatch(setSelectedRawgGame(null));
+                }}
+                className="flex flex-col w-full"
+              >
+                <div className={imageClassname}>
+                  <div className="absolute inset-0 border border-white/10 rounded-md pointer-events-none z-10" />
+                  <Image
+                    src={game.image}
+                    alt={game.name}
+                    className="object-cover hover:scale-105 transition-transform duration-300"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    placeholder={`data:image/svg+xml;base64,${toBase64(
+                      shimmer(700, 475)
+                    )}`}
+                    quality={100}
+                  />
+                </div>
+                <div className="flex flex-col flex-grow justify-between w-full">
+                  <p className="text-xl font-bold my-2">{game.name}</p>
+                </div>
+              </button>
+              {hasDeleteButton && <RemoveGameButton id={game.id} />}
+            </motion.div>
+          </motion.div>
         );
       })}
     </GridWrapper>

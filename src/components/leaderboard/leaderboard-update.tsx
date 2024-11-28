@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { useAppSelector } from "@/store/hooks";
 import { useMutation } from "convex/react";
 import { ChangeEvent, FormEvent, useState } from "react";
+import { toast } from "sonner";
 import { api } from "../../../convex/_generated/api";
 
 export const GameLeaderboardUpdate = () => {
@@ -19,6 +20,7 @@ export const GameLeaderboardUpdate = () => {
   const updateTotalMutation = useMutation(api.sessions.updateTotalMutation);
   const endSessionMutation = useMutation(api.sessions.endSessionMutation);
   const [update, setUpdate] = useState<{ name: string; score: number }[]>([]);
+  const [copied, setCopied] = useState(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -91,6 +93,7 @@ export const GameLeaderboardUpdate = () => {
   };
 
   if (!game) return null;
+
   if (finished) {
     return (
       <div className="p-6 rounded-lg bg-neutral-950">
@@ -143,6 +146,22 @@ export const GameLeaderboardUpdate = () => {
         {isOwner && (
           <Button type="button" onClick={handleEndSession}>
             End Session
+          </Button>
+        )}
+
+        {isOwner && (
+          <Button
+            type="button"
+            onClick={() => {
+              setCopied(true);
+              navigator.clipboard.writeText(window.location.href);
+              toast("Link copied to clipboard.", { position: "bottom-left" });
+              setTimeout(() => {
+                setCopied(false);
+              }, 2000);
+            }}
+          >
+            {copied ? "Copied!" : "Copy Link"}
           </Button>
         )}
       </div>

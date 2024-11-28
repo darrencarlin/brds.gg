@@ -43,3 +43,15 @@ export const deleteGame = mutation({
     await ctx.db.delete(game._id);
   },
 });
+
+export const deleteAllGamesByUser = mutation({
+  args: { email: v.string() },
+  handler: async (ctx, args) => {
+    const games = await ctx.db
+      .query("games")
+      .filter((q) => q.eq(q.field("user"), args.email))
+      .collect();
+
+    await Promise.all(games.map((game) => ctx.db.delete(game._id)));
+  },
+});

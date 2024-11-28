@@ -6,6 +6,7 @@ export interface AppState {
   selectedGame?: Game | null;
   isLoading: boolean;
   player: Player | null;
+  search: string;
 }
 
 export const initialState: AppState = {
@@ -13,6 +14,7 @@ export const initialState: AppState = {
   selectedGame: null,
   isLoading: false,
   player: null,
+  search: "",
 };
 
 const app = createSlice({
@@ -33,6 +35,9 @@ const app = createSlice({
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
+    setSearch: (state, action: PayloadAction<string>) => {
+      state.search = action.payload;
+    },
   },
 });
 
@@ -41,6 +46,7 @@ export const {
   setSelectedRawgGame,
   setSelectedGame,
   setLoading,
+  setSearch,
 } = app.actions;
 
 export default app.reducer;
