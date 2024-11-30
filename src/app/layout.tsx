@@ -77,6 +77,48 @@ export default async function RootLayout({
 
             <Toaster />
           </SessionProvider>
+
+          <footer className="flex gap-8 justify-center items-center py-16 text-center text-gray-300 font-bold">
+            <div className="flex flex-col text-left">
+              <p>Built by Darren: </p>
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://x.com/darrenjcarlin"
+                className="mt-2 underline"
+              >
+                Twitter
+              </a>
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://www.darrencarlin.com/"
+                className="mt-2 underline"
+              >
+                Web
+              </a>
+            </div>
+
+            <div className="flex flex-col text-left">
+              <p>Other stuff I have built:</p>{" "}
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://www.theguinnessmap.com/"
+                className="mt-2 underline"
+              >
+                The Guinness Map
+              </a>
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://www.wordlediscordbot.com/"
+                className="mt-2 underline"
+              >
+                Wordle Discord Bot
+              </a>
+            </div>
+          </footer>
         </body>
       </StoreProvider>
     </html>

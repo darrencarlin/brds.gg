@@ -44,7 +44,7 @@ export const HomePage = () => {
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-7xl font-bold mb-8"
+            className="text-4xl md:text-7xl font-bold mb-8"
           >
             Track your games and compete with friends in real-time
           </motion.h1>
@@ -160,7 +160,7 @@ export const HomePage = () => {
                 width={1024}
                 height={768}
                 alt={section.alt}
-                className="shadow-lg max-w-[500px]"
+                className="shadow-lg w-full max-w-[500px]"
               />
             </motion.div>
           </motion.div>
